@@ -413,10 +413,23 @@ const revealObserver = new IntersectionObserver(entries=>{
 },{threshold:.12});
 document.querySelectorAll(".reveal").forEach(el=>revealObserver.observe(el));
 
+
 function getGoogleFormConfig(){
- if(!PREFILLED_FORM_URL.startsWith("https://docs.google.com/forms/")) {
-  throw new Error("Please paste your Google Forms pre-filled link in the code first.");
- }
+ return {
+  action: "https://docs.google.com/forms/d/e/1FAIpQLSff8Jcm_vT7hLLJBN3R0yz2jP6HjQ6q5Tbydma4QG3iuqDEGg/formResponse",
+  entryIds: {
+   fullName: "entry.1888123461",
+   email: "entry.2107980664",
+   phone: "entry.1599928256",
+   postal: "entry.2140156834",
+   service: "entry.1932873583",
+   date: "entry.1512092802",
+   time: "entry.410626536",
+   details: "entry.1466987939"
+  }
+ };
+}
+
  const url=new URL(PREFILLED_FORM_URL);
  const params=url.searchParams;
  const entryIds={};
