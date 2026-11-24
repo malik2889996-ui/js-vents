@@ -335,7 +335,7 @@ section{padding:68px 0}
     <div class="field"><label for="postal">Postal Code *</label><input id="postal" required placeholder="e.g. M5V 2T6"></div>
     <div class="field full"><label for="service">Service Required *</label><select id="service" required><option value="">Select a service</option><option>Air Duct Cleaning</option><option>Dryer Vent Cleaning</option><option>Chimney Cleaning</option><option>Multiple Services</option></select></div>
     <div class="field"><label for="date">Preferred Date</label><input id="date" type="date"></div>
-    <div class="field"><label for="time">Preferred Time</label><select id="time"><option value="">Any time</option><option>Morning</option><option>Afternoon</option><option>Evening</option></select></div>
+    <div class="field"><label for="time">Preferred Time</label><select id="time"><option value="Any Time">Any Time</option><option>Morning</option><option>Afternoon</option><option>Evening</option></select></div>
     <div class="field full"><label for="details">Additional Details</label><textarea id="details" placeholder="Tell us a little about your home or service needs..."></textarea></div>
    </div>
    <button class="btn btn-primary form-submit" id="submitBtn" type="submit">Submit Quote Request ↗</button>
@@ -346,156 +346,152 @@ section{padding:68px 0}
 </div>
 
 <script>
-/* =====================================================
-   GOOGLE FORM SETUP
-   Paste your Google Forms PRE-FILLED link below.
-   ===================================================== */
-const PREFILLED_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSff8Jcm_vT7hLLJBN3R0yz2jP6HjQ6q5Tbydma4QG3iuqDEGg/viewform?usp=pp_url&entry.1888123461=JSVENTS_NAME&entry.2107980664=JSVENTS_EMAIL&entry.1599928256=JSVENTS_PHONE&entry.2140156834=JSVENTS_POSTAL&entry.1932873583=JSVENTS_SERVICE&entry.1512092802=2000-01-01&entry.410626536=JSVENTS_TIME&entry.1466987939=JSVENTS_DETAILS";
-
-/*
-IMPORTANT:
-Your pre-filled link must contain these exact unique
-marker values in the matching Google Form questions:
-JSVENTS_NAME
-JSVENTS_EMAIL
-JSVENTS_PHONE
-JSVENTS_POSTAL
-JSVENTS_SERVICE
-JSVENTS_DATE
-JSVENTS_DETAILS
-JSVENTS_TIME
-
-The script uses these markers to identify each entry ID.
-*/
-
-const FIELD_MARKERS = {
- fullName: "JSVENTS_NAME",
- email: "JSVENTS_EMAIL",
- phone: "JSVENTS_PHONE",
- postal: "JSVENTS_POSTAL",
- service: "JSVENTS_SERVICE",
- date: "JSVENTS_DATE",
- details: "JSVENTS_DETAILS",
- time: "JSVENTS_TIME"
-};
-
+/* JS Vents website interactions and Google Forms connection */
 const $ = id => document.getElementById(id);
+
 $("year").textContent = new Date().getFullYear();
 
+/* Set the date picker to today's local date and prevent past dates. */
+function setTodayAsPreferredDate() {
+  const dateInput = $("date");
+  const now = new Date();
+  const localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+    .toISOString()
+    .slice(0, 10);
+
+  dateInput.min = localDate;
+  if (!dateInput.value) dateInput.value = localDate;
+}
+setTodayAsPreferredDate();
+
 const modal = $("quoteModal");
-function openModal(serviceName=""){
- modal.classList.add("show");
- document.body.style.overflow="hidden";
- if(serviceName) $("service").value=serviceName;
-}
-function closeModal(){
- modal.classList.remove("show");
- document.body.style.overflow="";
-}
-$("closeModal").addEventListener("click",closeModal);
-modal.addEventListener("click",e=>{if(e.target===modal)closeModal()});
-document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal()});
 
-$("menuBtn").addEventListener("click",()=>{$("navLinks").classList.toggle("open")});
-document.querySelectorAll(".nav-links a").forEach(a=>a.addEventListener("click",()=>$("navLinks").classList.remove("open")));
+function openModal(serviceName = "") {
+  modal.classList.add("show");
+  document.body.style.overflow = "hidden";
+  setTodayAsPreferredDate();
+  if (serviceName) $("service").value = serviceName;
+}
 
-document.querySelectorAll(".faq-question").forEach(button=>{
- button.addEventListener("click",()=>button.parentElement.classList.toggle("open"));
+function closeModal() {
+  modal.classList.remove("show");
+  document.body.style.overflow = "";
+}
+
+$("closeModal").addEventListener("click", closeModal);
+modal.addEventListener("click", event => {
+  if (event.target === modal) closeModal();
+});
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape") closeModal();
 });
 
-const revealObserver = new IntersectionObserver(entries=>{
- entries.forEach(entry=>{
-  if(entry.isIntersecting){
-   entry.target.classList.add("visible");
-   revealObserver.unobserve(entry.target);
-  }
- });
-},{threshold:.12});
-document.querySelectorAll(".reveal").forEach(el=>revealObserver.observe(el));
+$("menuBtn").addEventListener("click", () => {
+  $("navLinks").classList.toggle("open");
+});
+document.querySelectorAll(".nav-links a").forEach(link => {
+  link.addEventListener("click", () => $("navLinks").classList.remove("open"));
+});
 
+document.querySelectorAll(".faq-question").forEach(button => {
+  button.addEventListener("click", () => button.parentElement.classList.toggle("open"));
+});
 
-function getGoogleFormConfig(){
- return {
-  action: "https://docs.google.com/forms/d/e/1FAIpQLSff8Jcm_vT7hLLJBN3R0yz2jP6HjQ6q5Tbydma4QG3iuqDEGg/formResponse",
-  entryIds: {
-   fullName: "entry.1888123461",
-   email: "entry.2107980664",
-   phone: "entry.1599928256",
-   postal: "entry.2140156834",
-   service: "entry.1932873583",
-   date: "entry.1512092802",
-   time: "entry.410626536",
-   details: "entry.1466987939"
-  }
- };
+if ("IntersectionObserver" in window) {
+  const revealObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("visible");
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll(".reveal").forEach(element => revealObserver.observe(element));
+} else {
+  document.querySelectorAll(".reveal").forEach(element => element.classList.add("visible"));
 }
 
- const url=new URL(PREFILLED_FORM_URL);
- const params=url.searchParams;
- const entryIds={};
- for(const [field,marker] of Object.entries(FIELD_MARKERS)){
-  const match=[...params.entries()].find(([key,value])=>key.startsWith("entry.") && value===marker);
-  if(!match) throw new Error("Pre-filled link is missing the marker for: "+field+". Please create the pre-filled link using the exact JSVENTS markers shown in the code.");
-  entryIds[field]=match[0];
- }
- const formIdMatch=url.pathname.match(/\/forms\/d\/e\/([^/]+)/);
- if(!formIdMatch) throw new Error("Google Form ID could not be read from the link.");
- return {
-  action:"https://docs.google.com/forms/d/e/"+formIdMatch[1]+"/formResponse",
-  entryIds
- };
-}
+/* Confirmed Google Forms destination and question entry IDs. */
+const GOOGLE_FORM_ACTION =
+  "https://docs.google.com/forms/d/e/1FAIpQLSff8Jcm_vT7hLLJBN3R0yz2jP6HjQ6q5Tbydma4QG3iuqDEGg/formResponse";
 
-$("quoteForm").addEventListener("submit",async function(e){
- e.preventDefault();
- const button=$("submitBtn");
- const status=$("formStatus");
- button.disabled=true;
- button.textContent="Submitting...";
- status.style.color="#087e68";
- try{
-  const config=getGoogleFormConfig();
-  const values={
-   fullName:$("fullName").value.trim(),
-   email:$("email").value.trim(),
-   phone:$("phone").value.trim(),
-   postal:$("postal").value.trim(),
-   service:$("service").value,
-   date:$("date").value,
-   details:$("details").value.trim(),
-   time:$("time").value
+const GOOGLE_FORM_ENTRIES = {
+  fullName: "entry.1888123461",
+  email: "entry.2107980664",
+  phone: "entry.1599928256",
+  postal: "entry.2140156834",
+  service: "entry.1932873583",
+  date: "entry.1512092802",
+  time: "entry.410626536",
+  details: "entry.1466987939"
+};
+
+$("quoteForm").addEventListener("submit", function (event) {
+  event.preventDefault();
+
+  const submitButton = $("submitBtn");
+  const status = $("formStatus");
+
+  if (!this.reportValidity()) return;
+
+  const values = {
+    fullName: $("fullName").value.trim(),
+    email: $("email").value.trim(),
+    phone: $("phone").value.trim(),
+    postal: $("postal").value.trim(),
+    service: $("service").value,
+    date: $("date").value,
+    time: $("time").value || "Any Time",
+    details: $("details").value.trim()
   };
-  const form=document.createElement("form");
-  form.method="POST";
-  form.action=config.action;
-  form.target="googleFormFrame";
-  form.style.display="none";
-  Object.entries(values).forEach(([field,value])=>{
-   const input=document.createElement("input");
-   input.type="hidden";
-   input.name=config.entryIds[field];
-   input.value=value;
-   form.appendChild(input);
-  });
-  let frame=document.getElementById("googleFormFrame");
-  if(!frame){
-   frame=document.createElement("iframe");
-   frame.name="googleFormFrame";
-   frame.id="googleFormFrame";
-   frame.style.display="none";
-   document.body.appendChild(frame);
+
+  submitButton.disabled = true;
+  submitButton.textContent = "Submitting...";
+  status.style.color = "#087e68";
+  status.textContent = "";
+
+  try {
+    let frame = $("googleFormFrame");
+    if (!frame) {
+      frame = document.createElement("iframe");
+      frame.name = "googleFormFrame";
+      frame.id = "googleFormFrame";
+      frame.style.display = "none";
+      document.body.appendChild(frame);
+    }
+
+    const googleForm = document.createElement("form");
+    googleForm.method = "POST";
+    googleForm.action = GOOGLE_FORM_ACTION;
+    googleForm.target = "googleFormFrame";
+    googleForm.style.display = "none";
+
+    Object.entries(values).forEach(([field, value]) => {
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = GOOGLE_FORM_ENTRIES[field];
+      input.value = value;
+      googleForm.appendChild(input);
+    });
+
+    document.body.appendChild(googleForm);
+    googleForm.submit();
+    googleForm.remove();
+
+    status.textContent =
+      "Your request has been sent. Thank you for contacting JS Vents!";
+    this.reset();
+    setTodayAsPreferredDate();
+  } catch (error) {
+    status.style.color = "#b34242";
+    status.textContent =
+      "Sorry, we couldn't submit your request. Please try again.";
+    console.error("Google Forms submission error:", error);
+  } finally {
+    submitButton.disabled = false;
+    submitButton.textContent = "Submit Quote Request ↗";
   }
-  document.body.appendChild(form);
-  form.submit();
-  form.remove();
-  status.textContent="Your request has been sent. Thank you for contacting JS Vents!";
-  this.reset();
- }catch(error){
-  status.style.color="#b34242";
-  status.textContent=error.message;
- }
- button.disabled=false;
- button.textContent="Submit Quote Request ↗";
 });
 </script>
 </body>
